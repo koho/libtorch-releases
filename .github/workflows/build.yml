@@ -30,8 +30,7 @@ jobs:
           TORCH_DIR=$(python3 -c "import torch; print(torch.__path__[0])")
           SITE_PACKAGES=$(python3 -c "import site; print(site.getsitepackages()[0])")
           mkdir -p libtorch
-          mkdir libtorch/lib
-          cp $TORCH_DIR/lib/* libtorch/lib/
+          cp -r "$TORCH_DIR/lib" libtorch/
           cp -r "$TORCH_DIR/include" libtorch/ 2>/dev/null || true
           cp -r "$TORCH_DIR/share" libtorch/ 2>/dev/null || true
           # Copy ALL vendored .so files from torch.libs/ and nvidia dirs
@@ -46,6 +45,8 @@ jobs:
           ls -la libtorch/lib/ | grep -i gfortran || echo "No libgfortran found"
           rm -rf libtorch/lib/*_test.so
           rm -rf libtorch/lib/libtorch_python.so
+          rm -rf libtorch/libshm
+          rm -rf libtorch/libshm_windows
           ls libtorch/lib/ | wc -l
           tar czf "libtorch-cxx11-abi-aarch64-${{ inputs.torch_version }}.tar.gz" libtorch
 
