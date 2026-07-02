@@ -31,7 +31,7 @@ jobs:
           SITE_PACKAGES=$(python3 -c "import site; print(site.getsitepackages()[0])")
           mkdir -p libtorch
           mkdir libtorch/lib
-          cp "$TORCH_DIR/lib/*" libtorch/lib/
+          cp $TORCH_DIR/lib/* libtorch/lib/
           cp -r "$TORCH_DIR/include" libtorch/ 2>/dev/null || true
           cp -r "$TORCH_DIR/share" libtorch/ 2>/dev/null || true
           # Copy ALL vendored .so files from torch.libs/ and nvidia dirs
