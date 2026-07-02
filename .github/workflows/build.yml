@@ -45,8 +45,8 @@ jobs:
           ls -la libtorch/lib/ | grep -i gfortran || echo "No libgfortran found"
           rm -rf libtorch/lib/*_test.so
           rm -rf libtorch/lib/libtorch_python.so
-          rm -rf libtorch/libshm
-          rm -rf libtorch/libshm_windows
+          rm -rf libtorch/lib/libshm
+          rm -rf libtorch/lib/libshm_windows
           ls libtorch/lib/ | wc -l
           tar czf "libtorch-cxx11-abi-aarch64-${{ inputs.torch_version }}.tar.gz" libtorch
 
