@@ -23,7 +23,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install PyTorch
-        run: pip install torch==${{ inputs.torch_version }}
+        run: pip install torch==${{ inputs.torch_version }} --index-url https://download.pytorch.org/whl/cpu
 
       - name: Package libtorch
         run: |
