@@ -6,7 +6,7 @@ on:
       grpc_version:
         description: "grpc version to build"
         required: true
-        default: "1.62.3"
+        default: "1.75.1"
 
 permissions:
   contents: write
