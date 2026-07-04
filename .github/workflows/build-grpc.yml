@@ -24,7 +24,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build latest
+      - name: Build grpc
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:grpc"
