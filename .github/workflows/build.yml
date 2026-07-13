@@ -27,11 +27,22 @@ jobs:
           python-version: "3.12"
 
       - name: Download wheel
+        id: get_whl
         if: ${{ inputs.wheel_url != '' }}
-        run: wget ${{ inputs.wheel_url }}
+        run: |
+          wget ${{ inputs.wheel_url }}
+          WHL=$(find . -maxdepth 1 -name "*.whl" | head -n 1)
+          echo "Found whl file: $WHL"
+          echo "whl_path=$WHL" >> $GITHUB_OUTPUT
 
       - name: Install PyTorch
-        run: pip install torch==${{ inputs.torch_version }} --index-url https://download.pytorch.org/whl/cpu
+        run: |
+          WHL_PATH="${{ steps.get_whl.outputs.whl_path }}"
+          if [ -n "$WHL_PATH" ]; then
+            pip install "$WHL_PATH"
+          else
+            pip install torch==${{ inputs.torch_version }} --index-url https://download.pytorch.org/whl/cpu
+          fi
 
       - name: Package libtorch
         run: |
