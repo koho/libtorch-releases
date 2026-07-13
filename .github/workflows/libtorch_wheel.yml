@@ -48,6 +48,7 @@ jobs:
         run: |
           TORCH_DIR=$(python3 -c "import torch; print(torch.__path__[0])")
           SITE_PACKAGES=$(python3 -c "import site; print(site.getsitepackages()[0])")
+          echo "$SITE_PACKAGES"
           mkdir -p libtorch
           cp -r "$TORCH_DIR/lib" libtorch/
           cp -r "$TORCH_DIR/include" libtorch/ 2>/dev/null || true
