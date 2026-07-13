@@ -1,0 +1,75 @@
+name: Build libtorch aarch64 (shared protobuf)
+
+on:
+  workflow_dispatch:
+    inputs:
+      torch_version:
+        description: "PyTorch version to package"
+        required: true
+        default: "2.10.0"
+      wheel_url:
+        description: "PyTorch wheel package url"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download wheel
+        id: get_whl
+        if: ${{ inputs.wheel_url != '' }}
+        run: |
+          wget ${{ inputs.wheel_url }}
+          WHL=$(find . -maxdepth 1 -name "*.whl" | head -n 1)
+          echo "Found whl file: $WHL"
+          echo "whl_path=$WHL" >> $GITHUB_OUTPUT
+
+      - name: Install PyTorch
+        run: |
+          WHL_PATH="${{ steps.get_whl.outputs.whl_path }}"
+          if [ -n "$WHL_PATH" ]; then
+            pip install "$WHL_PATH"
+          else
+            pip install torch==${{ inputs.torch_version }} --index-url https://download.pytorch.org/whl/cpu
+          fi
+
+      - name: Package libtorch
+        run: |
+          TORCH_DIR=$(python3 -c "import torch; print(torch.__path__[0])")
+          SITE_PACKAGES=$(python3 -c "import site; print(site.getsitepackages()[0])")
+          mkdir -p libtorch
+          cp -r "$TORCH_DIR/lib" libtorch/
+          cp -r "$TORCH_DIR/include" libtorch/ 2>/dev/null || true
+          cp -r "$TORCH_DIR/share" libtorch/ 2>/dev/null || true
+          # Copy ALL vendored .so files from torch.libs/ and nvidia dirs
+          for dir in "$SITE_PACKAGES"/torch.libs "$TORCH_DIR/../torch.libs"; do
+            if [ -d "$dir" ]; then
+              echo "Copying from $dir:"
+              ls "$dir"
+              cp "$dir"/*.so* libtorch/lib/ 2>/dev/null || true
+            fi
+          done
+          echo "=== Final libtorch/lib contents ==="
+          ls -la libtorch/lib/ | grep -i gfortran || echo "No libgfortran found"
+          rm -rf libtorch/lib/libtorch_python.so
+          rm -rf libtorch/lib/libshm
+          rm -rf libtorch/lib/libshm_windows
+          ls libtorch/lib/ | wc -l
+          tar czf "libtorch-cxx11-abi-aarch64-${{ inputs.torch_version }}.tar.gz" libtorch
+
+      - uses: actions/upload-artifact@v4.4.0
+        with:
+          name: libtorch
+          if-no-files-found: error
+          path: libtorch-cxx11-abi-aarch64-${{ inputs.torch_version }}.tar.gz
