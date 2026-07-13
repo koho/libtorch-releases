@@ -7,6 +7,10 @@ on:
         description: "PyTorch version to package"
         required: true
         default: "2.10.0"
+      wheel_url:
+        description: "PyTorch wheel package url"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -21,6 +25,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Download wheel
+        if: ${{ inputs.wheel_url != '' }}
+        run: wget ${{ inputs.wheel_url }}
 
       - name: Install PyTorch
         run: pip install torch==${{ inputs.torch_version }} --index-url https://download.pytorch.org/whl/cpu
